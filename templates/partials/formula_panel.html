@@ -1,0 +1,18 @@
+﻿{% set formulas = dashboard_payload.formulas.get(section_id, []) %}
+{% if formulas %}
+<div class="formula-panel">
+    <div class="formula-panel__header">
+        <h4>核心计算公式</h4>
+        <p>所有指标均由下列算法在线推导，可直接对照实现。</p>
+    </div>
+    <div class="formula-grid">
+        {% for formula in formulas %}
+        <article class="formula-card">
+            <h5>{{ formula.title }}</h5>
+            <p class="formula-latex">\({{ formula.latex }}\)</p>
+            <p class="formula-desc">{{ formula.description }}</p>
+        </article>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

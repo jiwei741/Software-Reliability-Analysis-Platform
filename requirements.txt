@@ -1,0 +1,7 @@
+# Core
+Flask>=2.3,<3.0
+requests>=2.31.0
+
+# Optional / data import
+openpyxl>=3.1.2
+mysql-connector-python>=8.1.0

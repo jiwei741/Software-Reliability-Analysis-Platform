@@ -1,0 +1,361 @@
+        <section id="classic-models" class="panel content-section" data-section="classic">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Classic Reliability Models</p>
+                    <h2>经典可靠性模型簇</h2>
+                    <p>覆盖 Goel-Okumoto、Jelinski-Moranda、Musa-Okumoto、Crow-AMSAA、Duane 等五大经典模型，贴合实验室、灰度、运维多阶段。</p>
+                </div>
+                <div class="section-actions">
+                    <button class="btn ghost analyze-btn" data-section-button="classic">开始分析</button>
+                    <span class="section-status" data-section-status="classic">等待分析</span>
+                </div>
+            </div>
+            <div class="model-grid">
+                <article class="model-card">
+                    <header>
+                        <h3>Goel-Okumoto</h3>
+                        <span class="status-pill success">NHPP</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>非齐次泊松过程（NHPP）假设失效率随时间指数下降，适合持续集成测试阶段。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( m(t) = a \cdot (1 - e^{-bt}) \)</span> 用于估计累计失效与剩余缺陷。</li>
+                        <li><strong>失效数据：</strong>读取导入数据的累计失效序列，构建 S 型增长曲线并反推参数 \(a, b\)。</li>
+                        <li><strong>预测分析：</strong>根据拟合结果输出「剩余缺陷」「达到目标 MTBF 所需时长」两项预测。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>Jelinski-Moranda</h3>
+                        <span class="status-pill warning">离散</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>以离散失效为单位，每修复一个缺陷都会降低总体失效强度。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( \lambda_i = \phi (N - i + 1) \)</span> 映射到每个失效区间。</li>
+                        <li><strong>失效数据：</strong>使用导入记录的相邻失效间隔或运行时长来更新 \( \lambda_i \) 阶梯曲线。</li>
+                        <li><strong>预测分析：</strong>输出剩余缺陷 \(N-i\) 与下一次失效的置信区间，辅助决定是否继续测试。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>Musa-Okumoto</h3>
+                        <span class="status-pill">对数泊松</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>对数泊松 NHPP，适合线上灰度或长尾失效阶段。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( m(t) = \frac{1}{\theta}\ln(1 + \theta N_0 t) \)</span>。</li>
+                        <li><strong>失效数据：</strong>以运行时长序列拟合 \(\theta, N_0\)，可同时展示实时强度 \( \lambda(t) \)。</li>
+                        <li><strong>预测分析：</strong>推送「剩余缺陷」「未来窗口失效数」以及线上风险提示。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>Crow-AMSAA</h3>
+                        <span class="status-pill">威布尔</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>威布尔增长模型，β&gt;1 表示持续改进，β&lt;1 触发退化预警。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( N(t) = \lambda t^{\beta} \)</span> 与 \( \lambda(t) = \lambda\beta t^{\beta-1} \)。</li>
+                        <li><strong>失效数据：</strong>按阶段对累计失效与测试工时采样，绘制 Weibull 直线与置信区域。</li>
+                        <li><strong>预测分析：</strong>输出增长率 β 趋势、到达目标可靠性所需的测试时长。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>Duane / Weibull</h3>
+                        <span class="status-pill">成长曲线</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>对数坐标下的线性成长模型，用于评估改进策略成效。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( \ln m(t) = \beta \ln t + \ln \lambda \)</span>。</li>
+                        <li><strong>失效数据：</strong>采用阶段性 MTBF 与失效总数构建 Duane Plot，展示斜率变化。</li>
+                        <li><strong>预测分析：</strong>根据斜率推算 MTBF 提升率及未来阶段的缺陷收敛速度。</li>
+                    </ul>
+                </article>
+            </div>
+            <p class="doc-note">点击“开始分析”后将根据最新导入的数据集估计参数与曲线，配合下方公式面板一起呈现。</p>
+            <div class="formula-panel" data-formula-container="classic"></div>
+            <div class="analysis-wrapper" data-section-container="classic">
+                <p class="doc-note">等待分析...</p>
+            </div>
+        </section>
+
+        <section id="ai-models" class="panel content-section" data-section="ai-models">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">AI / ML Reliability</p>
+                    <h2>人工智能模型族</h2>
+                    <p>以 BPN、RBF、SYM、GEP 等模型捕捉多变量非线性失效规律，支持自动诊断与预测。</p>
+                </div>
+                <div class="section-actions">
+                    <button class="btn ghost analyze-btn" data-section-button="ai-models">开始分析</button>
+                    <span class="section-status" data-section-status="ai-models">等待分析</span>
+                </div>
+            </div>
+            <div class="model-grid">
+                <article class="model-card">
+                    <header>
+                        <h3>BPN 神经网络</h3>
+                        <span class="status-pill success">多层感知</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>多层前馈网络 + 反向传播，拟合复杂的失效与压力因子关系。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( y = f(W_2 \cdot f(W_1 x + b_1) + b_2) \)</span>。</li>
+                        <li><strong>失效数据：</strong>将导入数据标准化为特征向量（模块、失效率、MTBF、运行时长等），作为网络输入。</li>
+                        <li><strong>预测分析：</strong>输出下一周期失效率与置信区间，并提供敏感度（特征重要性）列表。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>RBF 网络</h3>
+                        <span class="status-pill">径向基</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>利用局部高斯核刻画异常峰值，对小样本/实时数据友好。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( \phi(x) = e^{-\frac{(x-c)^2}{2\sigma^2}} \)</span>。</li>
+                        <li><strong>失效数据：</strong>使用最新导入样本计算中心 \(c\) 与带宽 \( \sigma \)，生成异常热度曲线。</li>
+                        <li><strong>预测分析：</strong>产出「异常置信度」与「回归值」双图，识别即将失效的模块。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>SYM 支持向量机</h3>
+                        <span class="status-pill warning">分类/回归</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>最大间隔思想提供稳健的可靠/不可靠分类边界。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( \min \frac{1}{2}\|w\|^2 + C \sum \xi_i \)</span>。</li>
+                        <li><strong>失效数据：</strong>依据导入记录自动生成标签（是否达标），并绘制 Margin / Support Vectors。</li>
+                        <li><strong>预测分析：</strong>展示 Precision / Recall / F1 柱状图，以及关键支持向量的模块名。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>GEP 基因表达式</h3>
+                        <span class="status-pill">符号回归</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>通过符号回归生成可解释的失效时间公式，便于运维复盘。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( TTF = \frac{1820}{1 + 0.03 \cdot Load} \)</span> 等可进化表达式。</li>
+                        <li><strong>失效数据：</strong>抽取 MTBF、运行时长、环境参数等特征构建染色体，保留最优式子。</li>
+                        <li><strong>预测分析：</strong>输出拟合曲线与残差条形图，支持导出为规则模板。</li>
+                    </ul>
+                </article>
+            </div>
+            <p class="doc-note">人工智能模型会在分析按钮触发时实时学习最新映射后的数据集，结果分为训练过程与推断结论两部分。</p>
+            <div class="formula-panel" data-formula-container="ai-models"></div>
+            <div class="analysis-wrapper" data-section-container="ai-models">
+                <p class="doc-note">等待分析...</p>
+            </div>
+        </section>
+
+        <section id="time-series" class="panel content-section" data-section="time-series">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Time Series Forecast</p>
+                    <h2>时间序列模型</h2>
+                    <p>以 ARIMA、Holt-Winters、Prophet 等模型捕捉趋势、季节项与节拍异常。</p>
+                </div>
+                <div class="section-actions">
+                    <button class="btn ghost analyze-btn" data-section-button="time-series">开始分析</button>
+                    <span class="section-status" data-section-status="time-series">等待分析</span>
+                </div>
+            </div>
+            <div class="model-grid">
+                <article class="model-card">
+                    <header>
+                        <h3>ARIMA(1,1,1)</h3>
+                        <span class="status-pill">差分序列</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>通过一次差分消除趋势，再用 ARMA(1,1) 预测未来失效率。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( \nabla y_t = \phi_1 \nabla y_{t-1} + \theta_1 \varepsilon_{t-1} + \varepsilon_t \)</span>。</li>
+                        <li><strong>失效数据：</strong>取最近 N 期失效率或 MTBF 序列，输出 ACF/PACF 辅助判断。</li>
+                        <li><strong>预测分析：</strong>展示 7/14/30 天预测曲线与置信区间，并提示潜在拐点。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>Holt-Winters</h3>
+                        <span class="status-pill success">三指数</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>同时建模水平 \(L_t\)、趋势 \(T_t\)、季节项 \(S_t\)，适合有节奏的可靠性数据。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( \hat{y}_{t+h} = (L_t + hT_t) + S_{t+h-m} \)</span>。</li>
+                        <li><strong>失效数据：</strong>根据导入数据的周/月周期自动确定季节长度 m，给出分量拆解图。</li>
+                        <li><strong>预测分析：</strong>生成趋势贡献率、季节贡献率以及异常点提示，辅助容量规划。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>Prophet</h3>
+                        <span class="status-pill warning">加性模型</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>加性模型自动适配假期与自定义事件，适合业务沟通。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( y(t) = g(t) + s(t) + h(t) + \varepsilon_t \)</span>。</li>
+                        <li><strong>失效数据：</strong>合并导入记录的日期、指标与标注事件（版本上线、活动日等）。</li>
+                        <li><strong>预测分析：</strong>输出节奏分解、假期影响以及长期可靠性走势，支持交互式游标。</li>
+                    </ul>
+                </article>
+            </div>
+            <div class="formula-panel" data-formula-container="time-series"></div>
+            <div class="analysis-wrapper" data-section-container="time-series">
+                <p class="doc-note">等待分析...</p>
+            </div>
+        </section>
+
+        <section id="combo-models" class="panel content-section" data-section="combo-models">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Weighted Ensemble</p>
+                    <h2>组合加权模型</h2>
+                    <p>静态加权、动态贝叶斯、灰关联等方式融合经典与人工智能模型的输出。</p>
+                </div>
+                <div class="section-actions">
+                    <button class="btn ghost analyze-btn" data-section-button="combo-models">开始分析</button>
+                    <span class="section-status" data-section-status="combo-models">等待分析</span>
+                </div>
+            </div>
+            <div class="model-grid">
+                <article class="model-card">
+                    <header>
+                        <h3>静态权重池</h3>
+                        <span class="status-pill success">加权平均</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>基于离线评估指标（RMSE/MAE）设定固定权重。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( \hat{y}_{ens} = \sum_{i} w_i \hat{y}_i,\; \sum w_i = 1 \)</span>。</li>
+                        <li><strong>失效数据：</strong>展示每个子模型在导入数据上的误差分布，供权重调优。</li>
+                        <li><strong>预测分析：</strong>给出集成曲线与单模型对比，突出贡献度最高的模型。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>动态贝叶斯</h3>
+                        <span class="status-pill warning">在线更新</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>实时监控残差并更新模型置信度，强化异常响应。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( w_i^{(t+1)} \propto w_i^{(t)} e^{-\frac{(e_i^{(t)})^2}{2\sigma^2}} \)</span>。</li>
+                        <li><strong>失效数据：</strong>展示连续窗口内的残差热图，方便定位波动来源。</li>
+                        <li><strong>预测分析：</strong>输出动态权重轨迹与集成预测，辅助灰度放量策略。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>灰关联评分</h3>
+                        <span class="status-pill">多指标</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>通过灰关联度评估各模型对目标序列的贴合程度。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( \xi_i(k) = \frac{\min + \rho \max}{|x_0(k) - x_i(k)| + \rho \max} \)</span>。</li>
+                        <li><strong>失效数据：</strong>使用 MTBF、失效率、修复时长等指标构建关联矩阵。</li>
+                        <li><strong>预测分析：</strong>输出综合得分排名与推荐组合方案，支持快速切换指标权重。</li>
+                    </ul>
+                </article>
+            </div>
+            <div class="formula-panel" data-formula-container="combo-models"></div>
+            <div class="analysis-wrapper" data-section-container="combo-models">
+                <p class="doc-note">等待分析...</p>
+            </div>
+        </section>
+
+        <section id="sda-model" class="panel content-section" data-section="sda-model">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Scenario Driven Assurance</p>
+                    <h2>SDA 场景驱动模型</h2>
+                    <p>围绕 OTA、冷启动、容灾切换等关键路径构建概率传播链，识别薄弱环节。</p>
+                </div>
+                <div class="section-actions">
+                    <button class="btn ghost analyze-btn" data-section-button="sda-model">开始分析</button>
+                    <span class="section-status" data-section-status="sda-model">等待分析</span>
+                </div>
+            </div>
+            <div class="model-grid">
+                <article class="model-card">
+                    <header>
+                        <h3>OTA 升级链路</h3>
+                        <span class="status-pill success">多节点</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>覆盖包生成→分发→终端验证全链路，关注单点失效。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( P_{OTA} = \prod_{i=1}^{n} P_i \)</span>。</li>
+                        <li><strong>失效数据：</strong>读取导入记录中的升级失败/回滚数据，映射到各环节的成功率。</li>
+                        <li><strong>预测分析：</strong>输出本批升级的成功率、预计回滚数，并列出 TOP 风险节点。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>冷启动路径</h3>
+                        <span class="status-pill warning">首登</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>聚焦用户首次登录/设备激活阶段的稳定性。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( R_{cold} = P_{auth} \times P_{cfg} \times P_{sync} \)</span>。</li>
+                        <li><strong>失效数据：</strong>展示认证失败、配置下发失败、数据同步异常的占比。</li>
+                        <li><strong>预测分析：</strong>根据趋势预测下一批冷启动的成功率，并提示需要扩容的节点。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>容灾切换</h3>
+                        <span class="status-pill">Failover</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>建模主备/多活切换的可用性，衡量恢复时间目标。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( P_{system} = 1 - \prod_{i}(1 - P_i) \)</span>。</li>
+                        <li><strong>失效数据：</strong>结合导入的切换测试数据（TTR、成功率）生成概率树。</li>
+                        <li><strong>预测分析：</strong>预测在给定故障率下的系统可用性，并计算所需备份容量。</li>
+                    </ul>
+                </article>
+            </div>
+            <div class="formula-panel" data-formula-container="sda-model"></div>
+            <div class="analysis-wrapper" data-section-container="sda-model">
+                <p class="doc-note">等待分析...</p>
+            </div>
+        </section>
+
+        <section id="comparisons" class="panel content-section" data-section="comparisons">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Model Comparison</p>
+                    <h2>模型对比分析</h2>
+                    <p>PKR 可靠度与性能/成本指标并行展示，辅助多维度选型。</p>
+                </div>
+                <div class="section-actions">
+                    <button class="btn ghost analyze-btn" data-section-button="comparisons">开始分析</button>
+                    <span class="section-status" data-section-status="comparisons">等待分析</span>
+                </div>
+            </div>
+            <div class="comparison-grid">
+                <article class="model-card">
+                    <header>
+                        <h3>PKR 对比矩阵</h3>
+                        <span class="status-pill success">可靠度</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>比较各模型在目标时间窗内保持可靠度的概率。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( PKR = P(R(t) \ge R^*, t \in [0,T]) \)</span>。</li>
+                        <li><strong>失效数据：</strong>以导入数据计算 \(R(t)\) 曲线，并为每个模型生成 PKR 热力图。</li>
+                        <li><strong>预测分析：</strong>输出满足 SLA 的模型集合，附带剩余风险与建议缓冲时间。</li>
+                    </ul>
+                </article>
+                <article class="model-card">
+                    <header>
+                        <h3>性能 / 成本</h3>
+                        <span class="status-pill warning">资源评估</span>
+                    </header>
+                    <ul class="model-meta">
+                        <li><strong>模型简介：</strong>计算训练耗时、推理延迟、资源占用，评估部署可行性。</li>
+                        <li><strong>相关公式：</strong><span class="formula-inline">\( Cost = \alpha \cdot GPU + \beta \cdot CPU + \gamma \cdot RAM \)</span>。</li>
+                        <li><strong>失效数据：</strong>结合导入数据规模统计每种模型的吞吐量与资源使用率。</li>
+                        <li><strong>预测分析：</strong>提供性能雷达图和 ROI 建议，帮助平衡可靠性与成本。</li>
+                    </ul>
+                </article>
+            </div>
+            <div class="formula-panel" data-formula-container="comparisons"></div>
+            <div class="analysis-wrapper" data-section-container="comparisons">
+                <p class="doc-note">等待分析...</p>
+            </div>
+        </section>

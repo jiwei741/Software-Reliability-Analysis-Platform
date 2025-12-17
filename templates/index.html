@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>软件可靠性分析平台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]'], ['$$', '$$']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+    <script id="dashboard-payload" type="application/json">
+        {{ dashboard_payload | tojson | safe }}
+    </script>
+    <script>
+        window.__RELIABILITY_DATA__ = JSON.parse(document.getElementById('dashboard-payload').textContent);
+    </script>
+</head>
+<body>
+    <header class="hero">
+        <div class="hero__content">
+            <p class="eyebrow">Software Reliability Intelligence</p>
+            <h1>软件可靠性分析平台</h1>
+            <p class="intro">
+                集数据导入、模型参数配置、经典/智能/时间序列/组合加权/SDA模型分析于一体，
+                并支持模型对比与系统管理的端到端可靠性运营入口。
+            </p>
+            <div class="hero__actions">
+                <button data-section-target="data-import" class="btn primary">开始导入数据</button>
+                <button data-section-target="docs" class="btn ghost">查看需求文档</button>
+                <button id="export-html-btn" class="btn ghost">导出分析 HTML</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="workspace">
+            <aside class="sidebar">
+                <div class="sidebar__title">导航</div>
+                <div class="sidebar__links">
+                    <button class="sidebar__link active" data-section-target="data-import">数据导入</button>
+                    <button class="sidebar__link" data-section-target="model-params">模型参数</button>
+                    <button class="sidebar__link" data-section-target="classic">经典模型</button>
+                    <button class="sidebar__link" data-section-target="ai-models">人工智能模型</button>
+                    <button class="sidebar__link" data-section-target="time-series">时间序列</button>
+                    <button class="sidebar__link" data-section-target="combo-models">组合加权</button>
+                    <button class="sidebar__link" data-section-target="sda-model">SDA 模型</button>
+                    <button class="sidebar__link" data-section-target="comparisons">模型对比</button>
+                    <button class="sidebar__link" data-section-target="system-management">系统管理</button>
+                    <button class="sidebar__link" data-section-target="docs">需求文档</button>
+                </div>
+            </aside>
+            <div class="content-area">
+        <section id="data-import" class="panel content-section section-visible" data-section="data-import">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Data Integration</p>
+                    <h2>多源数据导入</h2>
+                    <p>支持手动录入、CSV/Excel文件导入与数据库拉取，保障可靠性模型的数据底座。</p>
+                </div>
+                <div class="import-stats">
+                    <article>
+                        <p>今日导入</p>
+                        <strong id="daily-imports">{{ dashboard_payload.import_stats.daily }}</strong>
+                    </article>
+                    <article>
+                        <p>最新来源</p>
+                        <strong id="latest-source">{{ dashboard_payload.import_stats.latest_source }}</strong>
+                    </article>
+                </div>
+            </div>
+            <div class="grid import-grid">
+                <article class="card">
+                    <h3>手动导入</h3>
+                    <form id="manual-import-form" class="stack">
+                        <label>模块名称<input name="module" placeholder="例如：导航服务" required /></label>
+                        <label>失效次数<input name="failures" type="number" min="0" required /></label>
+                        <label>当前MTBF(小时)<input name="mtbf" type="number" min="0" step="0.1" required /></label>
+                        <label>运行时长(小时)<input name="runtime" type="number" min="0" step="0.1" placeholder="默认等于 MTBF" /></label>
+                        <button class="btn primary" type="submit">写入数据仓</button>
+                    </form>
+                </article>
+                <article class="card">
+                    <h3>文件导入</h3>
+                    <form id="file-import-form" class="stack" enctype="multipart/form-data">
+                        <label>选择CSV/Excel文件<input type="file" accept=".csv,.xlsx,.xls" required /></label>
+                        <label>数据标签<input name="tag" placeholder="版本迭代/里程碑" /></label>
+                        <button class="btn" type="submit">上传并获取样本</button>
+                    </form>
+                    <div class="preview-table-wrapper"><div class="preview-table" id="file-preview">等待解析...</div></div>
+                </article>
+                <article class="card">
+                    <h3>数据库导入</h3>
+                    <form id="db-import-form" class="stack">
+                        <label>连接串<input name="connection" placeholder="mysql://user:pass@host:3306/database" required /></label>
+                        <label>目标表<input name="table" placeholder="reliability_failures" required /></label>
+                        <label>增量字段<input name="increment" placeholder="updated_at" /></label>
+                        <label>样本条数<input name="limit" type="number" min="10" max="500" value="200" /></label>
+                        <button class="btn" type="submit">连接并获取样本</button>
+                    </form>
+                    <div class="analysis-status" id="db-inline-status">等待连接...</div>
+                    <div class="preview-table-wrapper"><div class="preview-table" id="db-sample-inline">尚未获取样本</div></div>
+                    <div class="status-pill" id="db-status">未连接</div>
+                </article>
+
+            </div>
+            <div class="import-log">
+                <h4>导入审计日志</h4>
+                <ul id="import-log-list"></ul>
+            </div>
+        </section>
+
+        <section id="model-params" class="panel content-section" data-section="model-params" data-section="model-params">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Model Parameters</p>
+                    <h2>模型参数配置</h2>
+                    <p>每个模型的关键参数在线管理，支持版本化与溯源。</p>
+                </div>
+                <button class="btn ghost" id="save-param-btn">保存配置</button>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>模型</th>
+                            <th>α / 初始强度</th>
+                            <th>β / 发散系数</th>
+                            <th>其他参数</th>
+                            <th>最近更新时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="param-table-body">
+                        {% for param in dashboard_payload.model_params %}
+                        <tr data-model="{{ param.id }}">
+                            <td>{{ param.name }}</td>
+                            <td><input type="number" step="0.01" value="{{ param.alpha }}" /></td>
+                            <td><input type="number" step="0.01" value="{{ param.beta }}" /></td>
+                            <td><input value="{{ param.extra }}" /></td>
+                            <td>{{ param.updated }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="param-toast" id="param-toast">参数已保存</div>
+        </section>
+
+        {% include 'partials/model_sections.html' %}
+
+        <section id="system-management" class="panel content-section" data-section="system-management">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">System Management</p>
+                    <h2>系统管理与用户分级</h2>
+                    <p>统一维护可靠性工程师、数据分析师、运维团队的角色、状态与审计记录。</p>
+                </div>
+                <div class="section-actions">
+                    <span class="status-pill success">2FA 已启用</span>
+                    <span class="section-status">目录同步：LDAP / SSO</span>
+                </div>
+            </div>
+            <div class="grid two">
+                <article class="card">
+                    <h3>快速创建用户</h3>
+                    <form id="user-form" class="stack">
+                        <label>姓名<input name="name" placeholder="如：张可" required /></label>
+                        <label>角色
+                            <select name="role">
+                                <option>可靠性工程师</option>
+                                <option>数据分析师</option>
+                                <option>运维经理</option>
+                                <option>访客</option>
+                            </select>
+                        </label>
+                        <label>邮箱<input type="email" name="email" placeholder="name@example.com" required /></label>
+                        <label>状态
+                            <select name="status">
+                                <option>启用</option>
+                                <option>停用</option>
+                            </select>
+                        </label>
+                        <button class="btn primary" type="submit">添加用户</button>
+                        <p class="doc-note">提交后将同步到云端 Worker（需在 .env 配置 WORKER_ENDPOINT）。</p>
+                    </form>
+                </article>
+                <article class="card">
+                    <h3>成员列表</h3>
+                    <div class="table-wrapper">
+                        <table id="user-table">
+                            <thead>
+                                <tr>
+                                    <th>姓名</th>
+                                    <th>角色</th>
+                                    <th>邮箱</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="empty-hint">
+                                    <td colspan="4">暂无成员，请左侧填写后添加。</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </div>
+            <article class="card">
+                <h3>操作审计与通知</h3>
+                <ul class="audit-list">
+                    <li>暂无记录，操作事件产生后将在此展示。</li>
+                </ul>
+            </article>
+        </section>
+
+        <section id="docs" class="panel content-section" data-section="docs">
+            <div class="section-header">
+                <div>
+                    <p class="eyebrow">Requirement Documents</p>
+                    <h2>需求分析与交付文档</h2>
+                    <p>所有需求整理在 <code>docs/requirements.md</code> 中，可在本地或 GitHub 镜像中查看与分享。</p>
+                </div>
+            </div>
+            <div class="doc-links">
+                <a class="doc-link" href="/docs/requirements.md" target="_blank" rel="noopener">本地需求分析文档</a>
+                <a class="doc-link" href="https://github.com/jiwei741/Software-Reliability-Analysis-Platform" target="_blank" rel="noopener">GitHub 快速链接</a>
+            </div>
+            <div class="grid two">
+                <article class="card">
+                    <h3>需求范围速览</h3>
+                    <ul class="doc-summary">
+                        <li>多源数据导入（手动 / 文件 / MySQL） + DeepSeek 智能映射双通道。</li>
+                        <li>经典、AI、时间序列、组合权重、SDA、对比分析等全套模型面板。</li>
+                        <li>系统管理、需求文档链接与 MathJax 公式渲染。</li>
+                    </ul>
+                </article>
+                <article class="card">
+                    <h3>交付清单</h3>
+                    <ul class="doc-summary">
+                        <li>本地运行的 Flask 后端 + 前端可视化。</li>
+                        <li>可点击触发的分区分析 API（/api/analyze/&lt;section&gt;）。</li>
+                        <li>需求文档与未来 roadmap（docs/requirements.md）。</li>
+                    </ul>
+                    <p class="doc-note">若需对接企业 Git 仓库，可直接上传 docs 目录。</p>
+                </article>
+            </div>
+            <article class="card">
+                <h3>交付里程碑</h3>
+                <ol class="doc-timeline">
+                    <li><strong>里程碑 1</strong> · 完成数据导入 + DeepSeek 映射链路。</li>
+                    <li><strong>里程碑 2</strong> · 模型分区 API 与图表按需渲染。</li>
+                    <li><strong>里程碑 3</strong> · 系统管理面板、需求文档链接全部上线。</li>
+                </ol>
+            </article>
+        </section>
+            </div>
+        </div>
+
+    <div class="modal-backdrop" id="file-analysis-modal" hidden>
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3>文件导入分析</h3>
+                <button type="button" class="modal-close" data-close="#file-analysis-modal">×</button>
+            </div>
+            <p id="file-modal-status">请选择分析方式并确认映射。</p>
+            <div class="option-group">
+                <label><input type="radio" name="file-modal-mode" value="preprocess" checked />本地映射</label>
+                <label><input type="radio" name="file-modal-mode" value="deepseek" />DeepSeek 智能解析</label>
+            </div>
+            <div class="mapping-grid">
+                <label>模块列<select id="file-modal-map-module"></select></label>
+                <label>失效列<select id="file-modal-map-failures"></select></label>
+                <label>MTBF列<select id="file-modal-map-mtbf"></select></label>
+                <label>时长列<select id="file-modal-map-runtime"></select></label>
+            </div>
+            <div class="ai-result" id="file-ai-result" hidden>
+                <div class="ai-result__header">
+                    <strong>DeepSeek 推荐映射</strong>
+                    <span id="file-ai-result-status">待运行</span>
+                </div>
+                <ul id="file-ai-result-list"></ul>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="file-modal-run" class="btn ghost">运行 DeepSeek</button>
+                <button type="button" id="file-modal-apply" class="btn" disabled>应用推荐映射</button>
+            </div>
+            <div class="preview-table-wrapper"><div class="preview-table" id="file-modal-preview">等待样本...</div></div>
+            <div class="modal-footer">
+                <button class="btn primary" type="button" id="file-modal-confirm">确认导入</button>
+                <button class="btn ghost" type="button" data-close="#file-analysis-modal">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="db-analysis-modal" hidden>
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h3>数据库导入分析</h3>
+                <button type="button" class="modal-close" data-close="#db-analysis-modal">×</button>
+            </div>
+            <p id="db-modal-status">样本已获取，请选择映射策略。</p>
+            <div class="option-group">
+                <label><input type="radio" name="db-modal-mode" value="preprocess" checked />本地映射</label>
+                <label><input type="radio" name="db-modal-mode" value="deepseek" />DeepSeek 智能解析</label>
+            </div>
+            <div class="mapping-grid">
+                <label>模块列<input id="db-modal-map-module" /></label>
+                <label>失效列<input id="db-modal-map-failures" /></label>
+                <label>MTBF列<input id="db-modal-map-mtbf" /></label>
+                <label>时长列<input id="db-modal-map-runtime" /></label>
+            </div>
+            <div class="ai-result" id="db-ai-result" hidden>
+                <div class="ai-result__header">
+                    <strong>DeepSeek 推荐映射</strong>
+                    <span id="db-ai-result-status">待运行</span>
+                </div>
+                <ul id="db-ai-result-list"></ul>
+            </div>
+            <div class="modal-actions">
+                <button type="button" id="db-modal-run" class="btn ghost">运行 DeepSeek</button>
+                <button type="button" id="db-modal-apply" class="btn" disabled>应用推荐映射</button>
+            </div>
+            <div class="preview-table-wrapper"><div class="preview-table" id="db-modal-preview">等待样本...</div></div>
+            <div class="modal-footer">
+                <button class="btn primary" type="button" id="db-modal-confirm">确认导入</button>
+                <button class="btn ghost" type="button" data-close="#db-analysis-modal">取消</button>
+            </div>
+        </div>
+    </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2025 软件可靠性分析平台 · 持续保障系统可信赖运行</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
